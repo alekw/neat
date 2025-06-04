@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="stylesheet" href="style.css">
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Criteria Table</title>
+</head>
+
+<body>
+    <a href="demo_outranking_flow.html">Demo outranking flow</a>
+    <a href="demo_partial_order.html">Demo partial order</a>
+    
+    <h1>Dynamic Criteria Table</h1>
+    
+    <!-- Input for number of criteria -->
+    <label for="criteria-count">Enter number of criteria:</label>
+    <input type="number" id="criteria-count" min="1">
+    <button id="generate-table">Generate Table</button>
+
+    <!-- Table container -->
+    <div id="criteria-container"></div>
+
+    <script>
+        document.getElementById('generate-table').addEventListener('click', () => {
+            const criteriaCount = parseInt(document.getElementById('criteria-count').value);
+
+            if (isNaN(criteriaCount) || criteriaCount <= 0) {
+                alert('Please enter a valid number of criteria.');
+                return;
+            }
+
+            generateCriteriaTable(criteriaCount);
+        });
+
+        function generateCriteriaTable(criteriaCount) {
+            const container = document.getElementById('criteria-container');
+            container.innerHTML = ''; // Clear any existing table
+
+            // Create the table
+            const table = document.createElement('table');
+            const thead = document.createElement('thead');
+            const tbody = document.createElement('tbody');
+
+            // Header row
+            const headerRow = document.createElement('tr');
+            headerRow.innerHTML = `
+                <th>Criterion ID (name)</th>
+                <th>Weight</th>
+                <th>Direction</th>
+                <th>Preference Function ID</th>
+                <th>Indifference Threshold</th>
+                <th>Preference Threshold</th>
+                <th>Gaussian Threshold</th>
+
+            `;
+            thead.appendChild(headerRow);
+
+            // Input rows for each criterion
+            for (let i = 1; i <= criteriaCount; i++) {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><input type="text" id="criterion-id-${i}" placeholder="C${i}"></td>
+                    <td>
+                        <select id="weight-${i}">
+                            <option value="very high">Very High</option>
+                            <option value="high">High</option>
+                            <option value="medium high">Medium High</option>
+                            <option value="medium">Medium</option>
+                            <option value="medium low">Medium Low</option>
+                            <option value="low">Low</option>
+                            <option value="very low">Very Low</option>
+                        </select>
+                    </td>
+                    <td>
+                        <select id="direction-${i}">
+                            <option value="Max">Max</option>
+                            <option value="Min">Min</option>
+                        </select>
+                    </td>
+                    <td>
+                        <select id="pref-func-${i}" onchange="handleThresholdChange(${i})">
+                            <option value="usual">Usual criterion (True criterion)</option>
+                            <option value="u-shaped">U-shaped criterion (Semi-criterion)</option>
+                            <option value="v-shaped">V-shaped criterion (Pre-criterion)</option>
+                            <option value="level">Level criterion</option>
+                            <option value="v-shaped indifference">V-shaped criterion with indifference area (Pseudo-criterion)</option>
+                            <option value="gaussian">Gaussian Criterion</option>
+                        </select>
+                    </td>
+                    <td><input type="number" id="indif-${i}" placeholder="Indiff."></td>
+                    <td><input type="number" id="pref-${i}" placeholder="Pref."></td>
+                    <td><input type="number" id="gaussian-${i}" placeholder="Gaussian" style="display: none;"></td>
+                `;
+                tbody.appendChild(row);
+            }
+
+            // Append the table to the container
+            table.appendChild(thead);
+            table.appendChild(tbody);
+            container.appendChild(table);
+
+            //initialize rendered view (thresholds)
+            for (let i = 1; i <= criteriaCount; i++) {
+                handleThresholdChange(i);
+            }
+
+            // Add a save button
+            const saveButton = document.createElement('button');
+            saveButton.textContent = 'Save Criteria';
+            saveButton.addEventListener('click', saveCriteria);
+            container.appendChild(saveButton);
+        }
+
+        function handleThresholdChange(row) {
+            // Get the selected preference function
+            const prefFunc = document.getElementById(`pref-func-${row}`).value;
+
+            // Get the input fields
+            const indifInput = document.getElementById(`indif-${row}`);
+            const prefInput = document.getElementById(`pref-${row}`);
+            const gaussianInput = document.getElementById(`gaussian-${row}`);
+
+            // Reset all fields to disabled/hidden by default
+            indifInput.style.display = "none";
+            prefInput.style.display = "none";
+            gaussianInput.style.display = "none";
+
+            // Enable fields based on the selected preference function
+            switch (prefFunc) {
+                case "usual":
+                    // No thresholds for 'usual'
+                    break;
+                case "u-shaped":
+                    indifInput.style.display = "inline";
+                    break;
+                case "v-shaped":
+                    prefInput.style.display = "inline";
+                    break;
+                case "level":
+                case "v-shaped indifference":
+                    indifInput.style.display = "inline";
+                    prefInput.style.display = "inline";
+                    break;
+                case "gaussian":
+                    gaussianInput.style.display = "inline";
+                    break;
+            }
+        }
+
+
+        let criteria = [];
+        let criteriaIds = [];
+
+        function saveCriteria() {
+            const criteriaCount = parseInt(document.getElementById('criteria-count').value);
+            criteria = [];
+
+            for (let i = 1; i <= criteriaCount; i++) {
+                const criterionId = document.getElementById(`criterion-id-${i}`).value.trim();
+                if (!criterionId) {
+                    alert(`Please enter an ID for Criterion ${i}.`);
+                    return;
+                }
+
+                const weight = document.getElementById(`weight-${i}`).value;
+                const direction = document.getElementById(`direction-${i}`).value;
+                const prefFunc = document.getElementById(`pref-func-${i}`).value;
+                const indifThreshold = parseFloat(document.getElementById(`indif-${i}`).value);
+                const prefThreshold = parseFloat(document.getElementById(`pref-${i}`).value);
+                const gaussianThreshold = parseFloat(document.getElementById(`gaussian-${i}`).value);
+
+
+                // Add the criterion to the array
+                criteria.push({
+                    id: criterionId,
+                    weight: weight.toLowerCase(),
+                    direction: direction.toLowerCase(),
+                    preference_function: prefFunc,
+                    indifference_threshold: indifThreshold,
+                    preference_threshold: prefThreshold,
+                    gaussian_threshold: gaussianThreshold
+                });
+            }
+
+            criteriaIds = criteria.map(c => c.id);
+
+
+            alert('Criteria saved! Please fill in alternatives.');
+        }
+    </script>
+
+
+
+
+    <h1>Input Alternatives</h1>
+
+    <!-- Input for number of alternatives -->
+    <label for="alternatives-count">Enter number of alternatives:</label>
+    <input type="number" id="alternatives-count" min="2">
+    <button id="generate-alternatives-table">Generate Table</button>
+
+    <!-- Table container -->
+    <div id="alternatives-container"></div>
+
+    <script>
+        // Array to store criteria IDs (replace with actual criteria IDs dynamically)
+
+        document.getElementById('generate-alternatives-table').addEventListener('click', () => {
+            const alternativesCount = parseInt(document.getElementById('alternatives-count').value);
+
+            if (isNaN(alternativesCount) || alternativesCount <= 0) {
+                alert('Please enter a valid number of alternatives.');
+                return;
+            }
+
+            generateAlternativesTable(alternativesCount);
+        });
+
+        function generateAlternativesTable(alternativesCount) {
+            const container = document.getElementById('alternatives-container');
+            container.innerHTML = ''; // Clear existing table
+
+            // Create the table
+            const table = document.createElement('table');
+            const thead = document.createElement('thead');
+            const tbody = document.createElement('tbody');
+
+            // Create the header row
+            const headerRow = document.createElement('tr');
+            headerRow.innerHTML = `<th>Alternatives \\ Criteria</th>`;
+
+            criteriaIds.forEach(criterion => {
+                headerRow.innerHTML += `<th>${criterion}</th>`;
+            });
+            thead.appendChild(headerRow);
+
+            // Create rows for each alternative
+            for (let alt = 1; alt <= alternativesCount; alt++) {
+                const row = document.createElement('tr');
+                row.innerHTML = `<td><input type="text" id="alternative-id-${alt}" placeholder="A${alt}"></td>`;
+
+
+
+                criteriaIds.forEach((criterion, index) => {
+                    row.innerHTML += `
+                        <td>
+                            <input type="number" id="L-${alt}-${index}" placeholder="L">
+                            <input type="number" id="A-${alt}-${index}" placeholder="A">
+                            <input type="number" id="B-${alt}-${index}" placeholder="B">
+                            <input type="number" id="R-${alt}-${index}" placeholder="R">
+                        </td>`;
+                });
+
+                tbody.appendChild(row);
+            }
+
+            // Append the table to the container
+            table.appendChild(thead);
+            table.appendChild(tbody);
+            container.appendChild(table);
+
+            // Add a save button
+            const saveButton = document.createElement('button');
+            saveButton.textContent = 'Save Alternatives';
+            saveButton.addEventListener('click', saveAlternatives);
+            container.appendChild(saveButton);
+        }
+
+        function saveAlternatives() {
+            const alternativesCount = parseInt(document.getElementById('alternatives-count').value);
+            const alternatives = [];
+
+            for (let alt = 1; alt <= alternativesCount; alt++) {
+                const alternativeId = document.getElementById(`alternative-id-${alt}`).value;
+                const parameters = {};
+
+                criteriaIds.forEach((criterion, index) => {
+                    const L = parseFloat(document.getElementById(`L-${alt}-${index}`).value);
+                    const A = parseFloat(document.getElementById(`A-${alt}-${index}`).value);
+                    const B = parseFloat(document.getElementById(`B-${alt}-${index}`).value);
+                    const R = parseFloat(document.getElementById(`R-${alt}-${index}`).value);
+
+                    if (isNaN(L) || isNaN(A) || isNaN(B) || isNaN(R)) {
+                        alert(`Please fill in all values for Alternative A${alt}, Criterion ${criterion}.`);
+                        return;
+                    }
+
+                    parameters[criterion] = { L, A, B, R };
+                });
+
+                alternatives.push({
+                    id: alternativeId,
+                    parameters: parameters
+                });
+            }
+
+            // JSON structure
+            const result = {
+                criteria: criteria,
+                alternatives: alternatives
+            };
+
+            // Display the JSON in the console
+            console.log(result);
+
+
+            // Display the JSON on the page
+            let div = document.getElementById('json-output-div');
+            div.style.display = 'block';
+
+            div = document.getElementById('chart1');
+            div.style.display = 'block';
+
+            div = document.getElementById('chart2');
+            div.style.display = 'block';
+
+            const jsonOutput = document.getElementById('json-output');
+            jsonOutput.textContent = JSON.stringify(result, null, 2);
+
+            const calculationResults = getResults(result);
+        }
+
+        // Function to send JSON data via POST
+        async function getResults(result) {
+            try {
+                const response = await fetch("http://127.0.0.1:7776/parse_json", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(result)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const responseData = await response.json();
+                drawAll(responseData);
+                drawPartialOrder(responseData);
+                //renderCharts(responseData);
+                console.log("Response from server:", responseData);
+                return responseData;
+            } catch (error) {
+                console.error("Error sending data:", error);
+            }
+        }
+
+    </script>
+
+    <!-- Section to display JSON output -->
+    <div id="json-output-div" style="display: none;">
+        <h1>JSON output</h1>
+        <div id="json-output" style="margin-top: 20px; white-space: pre-wrap; border: 1px solid #ddd; padding: 10px;">
+        </div>
+    </div>
+
+
+
+
+    <!-- phi fuzzy and crisp outranking flows-->
+    <div id="chart1" style="display: none;">
+<h2>NEAT F-PROMETHEE II total order</h2>
+        <script src='https://cdn.plot.ly/plotly-3.0.1.min.js'></script>
+        <div id="Phi"></div>
+        <div id="Phi+"></div>
+        <div id="Phi-"></div>
+
+
+        <script>
+            function drawAll(data) {
+                drawPhi(data)
+                drawPhiPlus(data)
+                drawPhiMinus(data)
+            }
+
+
+            function drawPhi(data) {
+                draw(data.Phi, data.rankPhi, data.crispPhi, "Phi");
+            }
+
+            function drawPhiMinus(data) {
+                draw(data.PhiMinus, data.rankPhiMinus, data.crispPhiMinus, "Phi-");
+            }
+
+            function drawPhiPlus(data) {
+                draw(data.PhiPlus, data.rankPhiPlus, data.crispPhiPlus, "Phi+");
+            }
+
+            function draw(phi, rankPhi, crispPhi, divName) {
+
+                const lines = [];
+
+                // Step 1: Find max rank
+                const allRanks = Object.values(rankPhi);
+                const maxRank = Math.max(...allRanks);
+
+                for (const [altName, xValues] of Object.entries(phi)) {
+
+                    const rank = rankPhi[altName];
+                    const invertedRank = maxRank - rank + 1;
+
+                    const trace = {
+                        name: altName,
+                        x: xValues,
+                        y: [0, invertedRank, invertedRank, 0],
+                    };
+
+                    const crisp = crispPhi[altName];
+
+
+                    const verticalTrace = {
+                        name: "crisp " + altName,
+                        x: [crisp, crisp],
+                        y: [0, invertedRank],
+                        line: {
+                            dash: 'dot',
+                        }
+                    }
+
+                    lines.push(trace)
+                    lines.push(verticalTrace)
+                }
+
+                var layout = {
+                    title: {
+                        text: divName + ' fuzzy and crisp outranking flow'
+                    },
+                    xaxis: {
+                        title: {
+                            text: divName
+                        },
+                        showgrid: false,
+                        zeroline: false
+                    },
+                    yaxis: {
+                        title: {
+                            text: 'Rank'
+                        },
+                        showline: false
+                    },
+                };
+
+                Plotly.newPlot(divName, lines, layout);
+            }
+        </script>
+    </div>
+
+    <!--partial order-->
+    <div id="chart2" style="display: none;">
+        <script src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
+        <script src="https://unpkg.com/dagre@0.7.4/dist/dagre.js"></script>
+        <script src="cytoscape-dagre.js"></script>
+
+        <h2>Partial order</h2>
+        <div id="cy"></div>
+
+        <script>
+            function drawPartialOrder(data) {
+
+                const ids = Object.keys(data.rankPhiPlus);
+
+                const nodes = ids.map(id => ({
+                    data: { id, label: id }
+                }));
+
+                const denseEdges = [];
+
+                for (let i = 0; i < ids.length; i++) {
+                    for (let j = 0; j < ids.length; j++) {
+                        if (i === j) continue;
+
+                        const a = ids[i];
+                        const b = ids[j];
+
+                        const pA = data.rankPhiPlus[a], pB = data.rankPhiPlus[b];
+                        const mA = data.rankPhiMinus[a], mB = data.rankPhiMinus[b];
+
+                        const prefers =
+                            (pA < pB && mA < mB) ||
+                            (pA === pB && mA < mB) ||
+                            (pA < pB && mA === mB);
+
+                        if (prefers) {
+                            denseEdges.push({ data: { source: a, target: b } });
+                        }
+                    }
+                }
+
+                const edges = transitiveReduction(nodes, denseEdges);
+
+
+
+                var cy = window.cy = cytoscape({
+                    container: document.getElementById('cy'),
+
+                    boxSelectionEnabled: false,
+                    autounselectify: true,
+
+                    layout: {
+                        name: 'dagre'
+                    },
+
+                    style: [
+                        {
+                            selector: 'node',
+                            style: {
+                                'background-color': '#11479e',
+                                'label': 'data(label)',
+                                'color': '#fff',
+                                'text-valign': 'center',
+                                'text-halign': 'center',
+                                'font-size': '12px',
+                                'text-outline-color': '#11479e',
+                                'text-outline-width': 2
+                            }
+                        },
+
+                        {
+                            selector: 'edge',
+                            style: {
+                                'width': 4,
+                                'target-arrow-shape': 'triangle',
+                                'line-color': '#9dbaea',
+                                'target-arrow-color': '#9dbaea',
+                                'curve-style': 'bezier'
+                            }
+                        }
+                    ],
+
+                    elements: {
+                        nodes: [...nodes],
+                        edges: [...edges]
+                    }
+                });
+
+            }
+
+            function transitiveReduction(nodes, edges) {
+                const adj = {};
+                nodes.forEach(n => adj[n.data.id] = []);
+
+                edges.forEach(e => {
+                    adj[e.data.source].push(e.data.target);
+                });
+
+                function reachable(from, avoid) {
+                    const visited = new Set();
+                    const stack = [...adj[from].filter(t => t !== avoid)];
+                    while (stack.length) {
+                        const node = stack.pop();
+                        if (!visited.has(node)) {
+                            visited.add(node);
+                            stack.push(...adj[node]);
+                        }
+                    }
+                    return visited;
+                }
+
+                return edges.filter(e => {
+                    const { source, target } = e.data;
+                    const reach = reachable(source, target);
+                    return !reach.has(target);
+                });
+            }
+        </script>
+
+
+    </div>
+
+</body>
+
+</html>
