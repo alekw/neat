@@ -12,9 +12,9 @@
 <body>
     <a href="demo_outranking_flow.html">Demo outranking flow</a>
     <a href="demo_partial_order.html">Demo partial order</a>
-    
+
     <h1>Dynamic Criteria Table</h1>
-    
+
     <!-- Input for number of criteria -->
     <label for="criteria-count">Enter number of criteria:</label>
     <input type="number" id="criteria-count" min="1">
@@ -237,6 +237,11 @@
             });
             thead.appendChild(headerRow);
 
+            const LINGUISTIC_OPTIONS = [
+                "very poor", "poor", "medium poor", "fair",
+                "medium good", "good", "very good"
+            ];
+
             // Create rows for each alternative
             for (let alt = 1; alt <= alternativesCount; alt++) {
                 const row = document.createElement('tr');
@@ -245,13 +250,66 @@
 
 
                 criteriaIds.forEach((criterion, index) => {
-                    row.innerHTML += `
-                        <td>
-                            <input type="number" id="L-${alt}-${index}" placeholder="L">
-                            <input type="number" id="A-${alt}-${index}" placeholder="A">
-                            <input type="number" id="B-${alt}-${index}" placeholder="B">
-                            <input type="number" id="R-${alt}-${index}" placeholder="R">
-                        </td>`;
+
+                    const cell = document.createElement('td');
+
+                    // Create toggle checkbox
+                    const toggleLabel = document.createElement('label');
+                    toggleLabel.innerText = 'Use linguistic ';
+                    const toggle = document.createElement('input');
+                    toggle.type = 'checkbox';
+                    toggle.id = `toggle-${alt}-${index}`;
+                    toggleLabel.appendChild(toggle);
+                    cell.appendChild(toggleLabel);
+
+                    // Container for inputs
+                    const inputContainer = document.createElement('div');
+                    inputContainer.id = `input-container-${alt}-${index}`;
+                    cell.appendChild(inputContainer);
+
+
+                    // Populate default inputs (L/A/B/R)
+                    function renderInputs() {
+                        inputContainer.innerHTML = '';
+                        ["L", "A", "B", "R"].forEach(letter => {
+                            const input = document.createElement('input');
+                            input.type = 'number';
+                            input.id = `${letter}-${alt}-${index}`;
+                            input.placeholder = letter;
+                            inputContainer.appendChild(input);
+                        });
+                    }
+
+
+                    // Populate dropdown
+                    function renderSelect() {
+                        inputContainer.innerHTML = '';
+                        const select = document.createElement('select');
+                        select.id = `performance-${alt}-${index}`;
+
+                        LINGUISTIC_OPTIONS.forEach(label => {
+                            const option = document.createElement('option');
+                            option.value = label;
+                            option.textContent = label;
+                            select.appendChild(option);
+                        });
+
+                        inputContainer.appendChild(select);
+                    }
+
+                    // Default view: L/A/B/R inputs
+                    renderInputs();
+
+                    // Add toggle logic
+                    toggle.addEventListener('change', () => {
+                        if (toggle.checked) {
+                            renderSelect();
+                        } else {
+                            renderInputs();
+                        }
+                    });
+
+                    row.appendChild(cell);
                 });
 
                 tbody.appendChild(row);
@@ -278,17 +336,22 @@
                 const parameters = {};
 
                 criteriaIds.forEach((criterion, index) => {
-                    const L = parseFloat(document.getElementById(`L-${alt}-${index}`).value);
-                    const A = parseFloat(document.getElementById(`A-${alt}-${index}`).value);
-                    const B = parseFloat(document.getElementById(`B-${alt}-${index}`).value);
-                    const R = parseFloat(document.getElementById(`R-${alt}-${index}`).value);
-
-                    if (isNaN(L) || isNaN(A) || isNaN(B) || isNaN(R)) {
-                        alert(`Please fill in all values for Alternative A${alt}, Criterion ${criterion}.`);
+                    const L = parseFloat(document.getElementById(`L-${alt}-${index}`)?.value);
+                    const A = parseFloat(document.getElementById(`A-${alt}-${index}`)?.value);
+                    const B = parseFloat(document.getElementById(`B-${alt}-${index}`)?.value);
+                    const R = parseFloat(document.getElementById(`R-${alt}-${index}`)?.value);
+                    const performance = document.getElementById(`performance-${alt}-${index}`)?.value;
+                    if ((isNaN(L) || isNaN(A) || isNaN(B) || isNaN(R)) && performance == null) {
+                        alert(`Please fill in all values for Alternative ${alt}, Criterion ${criterion}.`);
                         return;
                     }
 
-                    parameters[criterion] = { L, A, B, R };
+                    if (performance) {
+                        parameters[criterion] = { performance };
+                    }
+                    else {
+                        parameters[criterion] = { L, A, B, R };
+                    }
                 });
 
                 alternatives.push({
@@ -363,7 +426,7 @@
 
     <!-- phi fuzzy and crisp outranking flows-->
     <div id="chart1" style="display: none;">
-<h2>NEAT F-PROMETHEE II total order</h2>
+        <h2>NEAT F-PROMETHEE II total order</h2>
         <script src='https://cdn.plot.ly/plotly-3.0.1.min.js'></script>
         <div id="Phi"></div>
         <div id="Phi+"></div>

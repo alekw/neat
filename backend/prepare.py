@@ -30,8 +30,16 @@ def create_parameter_matrix(decision_data: DecisionData) -> np.ndarray:
         for crit_id, param in alternative.parameters.items():
             # Find the index of the criterion in the criteria list
             crit_idx = criterion_id_to_index[crit_id]
+            
+            LABR = [param.L, param.A, param.B, param.R]
+            
+            #parse linquistic performance of alternative if provided
+            if param.performance:
+                LABR = LINGUISTIC_PERFORMANCES[param.performance]
+                if LABR is None:
+                    raise ValueError(f"Unknown performance label: '{param.performance}'")
             # Store the [L, A, B, R] values as a list in the appropriate cell
-            E[i, crit_idx] = [param.L, param.A, param.B, param.R]
+            E[i, crit_idx] = LABR
 
     return E
 

@@ -1,14 +1,16 @@
 from dataclasses import dataclass, field
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 # Define data classes to represent Criteria, Alternatives, and Parameters
 
+
 @dataclass
 class Parameter:
-    L: float
-    A: float
-    B: float
-    R: float
+    L: Optional[float] = None
+    A: Optional[float] = None
+    B: Optional[float] = None
+    R: Optional[float] = None
+    performance: Optional[str] = None  # e.g., "medium good"
 
 @dataclass
 class Criterion:
