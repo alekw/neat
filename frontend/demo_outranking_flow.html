@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NEAT F-PROMETHEE II total order</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
@@ -15,6 +16,7 @@
     <div id="Phi"></div>
     <div id="Phi+"></div>
     <div id="Phi-"></div>
+    <div id="data-table-container"></div>
 
 
     <script>
@@ -1485,7 +1487,11 @@
         fetch("http://127.0.0.1:7776/parse_json", requestOptions)
             .then(response => response.text())
             //.then(result => console.log(result))
-            .then(result => drawAll(JSON.parse(result)))
+            .then(result => {
+                const data = JSON.parse(result);
+                drawAll(data);
+                renderDataTable(data);
+            })
             .catch(error => console.log('error', error));
 
 
@@ -1564,6 +1570,29 @@
 
             Plotly.newPlot(divName, lines, layout);
         }
+
+        function renderDataTable(data) {
+                const container = document.getElementById('data-table-container');
+                const alternatives = Object.keys(data.Phi).sort();
+
+                let html = '<table class="data-table"><thead><tr><th>Alternative</th><th>Phi+</th><th>Phi-</th><th>Phi</th></tr></thead><tbody>';
+
+                alternatives.forEach(alt => {
+                    const phiValues = data.Phi[alt];
+                    const phiPlusValues = data.PhiPlus[alt];
+                    const phiMinusValues = data.PhiMinus[alt];
+
+                    html += `<tr>
+                        <td>${alt}</td>
+                        <td>[${phiPlusValues.map(v => v.toFixed(4)).join(', ')}]</td>
+                        <td>[${phiMinusValues.map(v => v.toFixed(4)).join(', ')}]</td>
+                        <td>[${phiValues.map(v => v.toFixed(4)).join(', ')}]</td>
+                    </tr>`;
+                });
+
+                html += '</tbody></table>';
+                container.innerHTML = html;
+            }
     </script>
 
 

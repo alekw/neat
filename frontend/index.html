@@ -404,6 +404,7 @@
                 const responseData = await response.json();
                 drawAll(responseData);
                 drawPartialOrder(responseData);
+                renderDataTable(responseData);
                 //renderCharts(responseData);
                 console.log("Response from server:", responseData);
                 return responseData;
@@ -431,6 +432,9 @@
         <div id="Phi"></div>
         <div id="Phi+"></div>
         <div id="Phi-"></div>
+
+        <h2>Fuzzy Values Summary</h2>
+        <div id="data-table-container"></div>
 
 
         <script>
@@ -508,6 +512,29 @@
                 };
 
                 Plotly.newPlot(divName, lines, layout);
+            }
+
+            function renderDataTable(data) {
+                const container = document.getElementById('data-table-container');
+                const alternatives = Object.keys(data.Phi).sort();
+
+                let html = '<table class="data-table"><thead><tr><th>Alternative</th><th>Phi+</th><th>Phi-</th><th>Phi</th></tr></thead><tbody>';
+
+                alternatives.forEach(alt => {
+                    const phiValues = data.Phi[alt];
+                    const phiPlusValues = data.PhiPlus[alt];
+                    const phiMinusValues = data.PhiMinus[alt];
+
+                    html += `<tr>
+                        <td>${alt}</td>
+                        <td>[${phiPlusValues.map(v => v.toFixed(4)).join(', ')}]</td>
+                        <td>[${phiMinusValues.map(v => v.toFixed(4)).join(', ')}]</td>
+                        <td>[${phiValues.map(v => v.toFixed(4)).join(', ')}]</td>
+                    </tr>`;
+                });
+
+                html += '</tbody></table>';
+                container.innerHTML = html;
             }
         </script>
     </div>
