@@ -62,7 +62,7 @@
             for (let i = 1; i <= criteriaCount; i++) {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td><input type="text" id="criterion-id-${i}" placeholder="C${i}"></td>
+                    <td><input type="text" id="criterion-id-${i}" value="C${i}"></td>
                     <td>
                         <select id="weight-${i}">
                             <option value="very high">Very High</option>
@@ -245,7 +245,7 @@
             // Create rows for each alternative
             for (let alt = 1; alt <= alternativesCount; alt++) {
                 const row = document.createElement('tr');
-                row.innerHTML = `<td><input type="text" id="alternative-id-${alt}" placeholder="A${alt}"></td>`;
+                row.innerHTML = `<td><input type="text" id="alternative-id-${alt}" value="A${alt}"></td>`;
 
 
 
