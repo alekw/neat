@@ -7,10 +7,8 @@
 
   <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1">
 
-
-  <script src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
-  <script src="https://unpkg.com/dagre@0.7.4/dist/dagre.js"></script>
-  <script src="cytoscape-dagre.js"></script>
+  <script src="https://unpkg.com/cytoscape/dist/cytoscape.umd.js"></script>
+  <script src="https://unpkg.com/cytoscape-dagre@4.0.0/dist/cytoscape-dagre.min.js"></script>
 
   <style>
     #cy {
@@ -1499,114 +1497,10 @@
       .then(result => drawPartialOrder(JSON.parse(result)))
       .catch(error => console.log('error', error));
 
-    function drawPartialOrder(data) {
-
-      const ids = Object.keys(data.rankPhiPlus);
-
-      const nodes = ids.map(id => ({
-        data: { id, label: id }
-      }));
-
-      const denseEdges = [];
-
-      for (let i = 0; i < ids.length; i++) {
-        for (let j = 0; j < ids.length; j++) {
-          if (i === j) continue;
-
-          const a = ids[i];
-          const b = ids[j];
-
-          const pA = data.rankPhiPlus[a], pB = data.rankPhiPlus[b];
-          const mA = data.rankPhiMinus[a], mB = data.rankPhiMinus[b];
-
-          const prefers =
-            (pA < pB && mA < mB) ||
-            (pA === pB && mA < mB) ||
-            (pA < pB && mA === mB);
-
-          if (prefers) {
-            denseEdges.push({ data: { source: a, target: b } });
-          }
-        }
-      }
-
-      const edges = transitiveReduction(nodes, denseEdges);
-
-      var cy = window.cy = cytoscape({
-        container: document.getElementById('cy'),
-
-        boxSelectionEnabled: false,
-        autounselectify: true,
-
-        layout: {
-          name: 'dagre'
-        },
-
-        style: [
-          {
-            selector: 'node',
-            style: {
-              'background-color': '#11479e',
-              'label': 'data(label)',
-              'color': '#fff',
-              'text-valign': 'center',
-              'text-halign': 'center',
-              'font-size': '12px',
-              'text-outline-color': '#11479e',
-              'text-outline-width': 2
-            }
-          },
-
-          {
-            selector: 'edge',
-            style: {
-              'width': 4,
-              'target-arrow-shape': 'triangle',
-              'line-color': '#9dbaea',
-              'target-arrow-color': '#9dbaea',
-              'curve-style': 'bezier'
-            }
-          }
-        ],
-
-        elements: {
-          nodes: [...nodes],
-          edges: [...edges]
-        }
-      });
-
-    }
-
-    function transitiveReduction(nodes, edges) {
-      const adj = {};
-      nodes.forEach(n => adj[n.data.id] = []);
-
-      edges.forEach(e => {
-        adj[e.data.source].push(e.data.target);
-      });
-
-      function reachable(from, avoid) {
-        const visited = new Set();
-        const stack = [...adj[from].filter(t => t !== avoid)];
-        while (stack.length) {
-          const node = stack.pop();
-          if (!visited.has(node)) {
-            visited.add(node);
-            stack.push(...adj[node]);
-          }
-        }
-        return visited;
-      }
-
-      return edges.filter(e => {
-        const { source, target } = e.data;
-        const reach = reachable(source, target);
-        return !reach.has(target);
-      });
-    }
-
   </script>
 
 </body>
+
+<script src="shared.js"></script>
 
 </html>

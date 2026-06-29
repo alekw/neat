@@ -12,7 +12,7 @@
     <h1>NEAT F-PROMETHEE II total order</h1>
 
 
-    <script src='https://cdn.plot.ly/plotly-3.0.1.min.js'></script>
+    <script src='https://cdn.plot.ly/plotly-3.6.0.min.js'></script>
     <div id="Phi"></div>
     <div id="Phi+"></div>
     <div id="Phi-"></div>
@@ -1493,110 +1493,11 @@
                 renderDataTable(data);
             })
             .catch(error => console.log('error', error));
-
-
-        function drawAll(data) {
-            drawPhi(data)
-            drawPhiPlus(data)
-            drawPhiMinus(data)
-        }
-
-        function drawPhi(data) {
-            draw(data.Phi, data.rankPhi, data.crispPhi, "Phi");
-        }
-
-        function drawPhiMinus(data) {
-            draw(data.PhiMinus, data.rankPhiMinus, data.crispPhiMinus, "Phi-");
-        }
-
-        function drawPhiPlus(data) {
-            draw(data.PhiPlus, data.rankPhiPlus, data.crispPhiPlus, "Phi+");
-        }
-
-        function draw(phi, rankPhi, crispPhi, divName) {
-
-            const lines = [];
-
-            // Step 1: Find max rank
-            const allRanks = Object.values(rankPhi);
-            const maxRank = Math.max(...allRanks);
-
-            for (const [altName, xValues] of Object.entries(phi)) {
-
-                const rank = rankPhi[altName];
-                const invertedRank = maxRank - rank + 1;
-
-                const trace = {
-                    name: altName,
-                    x: xValues,
-                    y: [0, invertedRank, invertedRank, 0],
-                };
-
-                const crisp = crispPhi[altName];
-
-
-                const verticalTrace = {
-                    name: "crisp " + altName,
-                    x: [crisp, crisp],
-                    y: [0, invertedRank],
-                    line: {
-                        dash: 'dot',
-                    }
-                }
-
-                lines.push(trace)
-                lines.push(verticalTrace)
-            }
-
-            var layout = {
-                title: {
-                    text: divName + ' fuzzy and crisp outranking flow'
-                },
-                xaxis: {
-                    title: {
-                        text: divName
-                    },
-                    showgrid: false,
-                    zeroline: false
-                },
-                yaxis: {
-                    title: {
-                        text: 'Rank'
-                    },
-                    showline: false
-                },
-            };
-
-
-            Plotly.newPlot(divName, lines, layout);
-        }
-
-        function renderDataTable(data) {
-                const container = document.getElementById('data-table-container');
-                const alternatives = Object.keys(data.Phi).sort();
-
-                let html = '<table class="data-table"><thead><tr><th>Alternative</th><th>Phi+</th><th>Phi-</th><th>Phi</th></tr></thead><tbody>';
-
-                alternatives.forEach(alt => {
-                    const phiValues = data.Phi[alt];
-                    const phiPlusValues = data.PhiPlus[alt];
-                    const phiMinusValues = data.PhiMinus[alt];
-
-                    html += `<tr>
-                        <td>${alt}</td>
-                        <td>[${phiPlusValues.map(v => v.toFixed(4)).join(', ')}]</td>
-                        <td>[${phiMinusValues.map(v => v.toFixed(4)).join(', ')}]</td>
-                        <td>[${phiValues.map(v => v.toFixed(4)).join(', ')}]</td>
-                    </tr>`;
-                });
-
-                html += '</tbody></table>';
-                container.innerHTML = html;
-            }
     </script>
 
 
 
+<script src="shared.js"></script>
 
 
 
