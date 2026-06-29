@@ -26,10 +26,17 @@ button {
 }
 
 #cy {
-    position: absolute;
-    width: 90%;
-    height: 100%;
-    margin: 0 auto;
+    position: relative;
+    width: 95%;
+    height: 90vh;
+    margin: 20px 0px;
     display: block;
     z-index: 1;
+    border: 1px solid #ddd;
+}
+
+#data-table-container {
+    position: relative;
+    z-index: 2;
+    margin-top: 20px;
 }

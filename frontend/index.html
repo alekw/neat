@@ -2,11 +2,11 @@
 <html lang="en">
 
 <head>
-    <link rel="stylesheet" href="style.css">
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dynamic Criteria Table</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="shared.js"></script>
 </head>
 
 <body>
@@ -404,7 +404,8 @@
                 const responseData = await response.json();
                 drawAll(responseData);
                 drawPartialOrder(responseData);
-                renderDataTable(responseData);
+                renderFuzzySummaryTable(responseData);
+                renderCrispRankSummaryTable(responseData);
                 //renderCharts(responseData);
                 console.log("Response from server:", responseData);
                 return responseData;
@@ -454,6 +455,5 @@
 
 </body>
 
-    <script src="shared.js"></script>
 
 </html>

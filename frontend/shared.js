@@ -56,12 +56,13 @@
         Plotly.newPlot(divName, lines, layout);
     }
 
-    window.renderDataTable = function(data) {
+    window.renderFuzzySummaryTable = function(data) {
         const container = document.getElementById('data-table-container');
         if (!container) return;
         const alternatives = Object.keys(data.Phi).sort();
 
-        let html = '<table class="data-table"><thead><tr><th>Alternative</th><th>Phi+</th><th>Phi-</th><th>Phi</th></tr></thead><tbody>';
+        let html = '<h3>Fuzzy Values Summary</h3>';
+        html += '<table class="data-table"><thead><tr><th>Alternative</th><th>Phi+</th><th>Phi-</th><th>Phi</th></tr></thead><tbody>';
 
         alternatives.forEach(alt => {
             const phiValues = data.Phi[alt];
@@ -78,6 +79,37 @@
 
         html += '</tbody></table>';
         container.innerHTML = html;
+    }
+
+    window.renderCrispRankSummaryTable = function(data) {
+        const container = document.getElementById('data-table-container');
+        if (!container) return;
+        const alternatives = Object.keys(data.Phi).sort();
+
+        let html = '<h3>Crisp and Rank Summary</h3>';
+        html += '<table class="data-table"><thead><tr><th>Alternative</th><th>Phi+ crisp</th><th>Rank Phi+</th><th>Phi- crisp</th><th>Rank Phi-</th><th>Phi net crisp</th><th>Rank Phi</th></tr></thead><tbody>';
+
+        alternatives.forEach(alt => {
+            const phiCrispPlus = data.crispPhiPlus?.[alt];
+            const rankPhiPlus = data.rankPhiPlus?.[alt];
+            const phiCrispMinus = data.crispPhiMinus?.[alt];
+            const rankPhiMinus = data.rankPhiMinus?.[alt];
+            const phiCrisp = data.crispPhi?.[alt];
+            const rankPhi = data.rankPhi?.[alt];
+
+            html += `<tr>
+                <td>${alt}</td>
+                <td>${phiCrispPlus.toFixed(4)}</td>
+                <td>${rankPhiPlus ?? ''}</td>
+                <td>${phiCrispMinus.toFixed(4)}</td>
+                <td>${rankPhiMinus ?? ''}</td>
+                <td>${phiCrisp.toFixed(4)}</td>
+                <td>${rankPhi ?? ''}</td>
+            </tr>`;
+        });
+
+        html += '</tbody></table>';
+        container.innerHTML += html;
     }
 
     // Partial order helpers (cytoscape)
