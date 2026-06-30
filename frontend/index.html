@@ -389,7 +389,7 @@
         // Function to send JSON data via POST
         async function getResults(result) {
             try {
-                const response = await fetch("http://127.0.0.1:7776/parse_json", {
+                const response = await fetch(window.NEAT_PARSE_JSON_URL, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"

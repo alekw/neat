@@ -1,4 +1,6 @@
 (function(){
+    window.NEAT_PARSE_JSON_URL = "http://127.0.0.1:7776/parse_json";
+
     // Plotly drawing helpers
     window.drawAll = function(data) {
         drawPhi(data)
