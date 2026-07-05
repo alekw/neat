@@ -42,4 +42,4 @@ def parse_json():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=7776, debug=True, use_reloader=False, threaded=False)
+    app.run(host='0.0.0.0', port=5000, debug=True, use_reloader=False, threaded=False)

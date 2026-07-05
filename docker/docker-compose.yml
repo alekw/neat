@@ -4,7 +4,7 @@ services:
       context: ../backend
       dockerfile: ../docker/backend/Dockerfile
     ports:
-      - "7776:7776"
+      - "5000:5000"
     volumes:
       - ../backend:/app
 
@@ -13,4 +13,4 @@ services:
     volumes:
       - ../frontend:/usr/share/nginx/html:ro
     ports:
-      - "7777:80"
+      - "5001:80"
