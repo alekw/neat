@@ -71,15 +71,6 @@ frontend/index.html
 - docker/ contains Docker configuration for running both parts together.
 - example.json contains a sample input payload with criteria and alternatives.
 
-## Quick start
-
-Once the backend is running, you can open the frontend directly in your browser:
-
-```text
-frontend/index.html
-```
-
-From there, you can define criteria and alternatives, submit the data, and the application will send it to the backend for processing.
 
 ## Backend endpoint
 
