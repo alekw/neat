@@ -81,7 +81,66 @@ POST /parse_json
 
 Example request using curl:
 ```bash
-curl -X POST http://localhost:5000/parse_json -H "Content-Type: application/json" -d '{"example": true}'
+curl --location --request POST 'http://localhost:5000/parse_json' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+  "criteria": [
+    {
+      "id": "c1",
+      "weight": "very high",
+      "direction": "max",
+      "preference_function": "u-shaped",
+      "indifference_threshold": 5,
+      "preference_threshold": null,
+      "gaussian_threshold": null
+    },
+    {
+      "id": "c2",
+      "weight": "medium high",
+      "direction": "max",
+      "preference_function": "gaussian",
+      "indifference_threshold": null,
+      "preference_threshold": null,
+      "gaussian_threshold": 5
+    }
+  ],
+  "alternatives": [
+    {
+      "id": "a2",
+      "parameters": {
+        "c1": {
+          "L": 1,
+          "A": 2,
+          "B": 3,
+          "R": 4
+        },
+        "c2": {
+          "L": 1,
+          "A": 2,
+          "B": 3,
+          "R": 4
+        }
+      }
+    },
+    {
+      "id": "a1",
+      "parameters": {
+        "c1": {
+          "L": 5,
+          "A": 6,
+          "B": 7,
+          "R": 8
+        },
+        "c2": {
+          "L": 5,
+          "A": 6,
+          "B": 7,
+          "R": 8
+        }
+      }
+    }
+  ]
+}'
 ```
 ## Hosted deployment
 
