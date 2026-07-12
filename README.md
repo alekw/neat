@@ -92,3 +92,8 @@ Example request using curl:
 ```bash
 curl -X POST http://localhost:5000/parse_json -H "Content-Type: application/json" -d '{"example": true}'
 ```
+## Hosted deployment
+
+The application is also hosted here:
+- Frontend: http://mcda.pm.szczecin.pl/
+- Backend: http://mcda.pm.szczecin.pl/api/v1/neat/parse_json
