@@ -70,7 +70,7 @@ frontend/index.html
 - frontend/ contains the HTML/JavaScript UI.
 - docker/ contains Docker configuration for running both parts together.
 - example.json contains a sample input payload with criteria and alternatives.
-- API.md describes the input and output JSON structure of the backend API.
+- [API.md](API.md) describes the input and output JSON structure of the backend API.
 
 
 ## Backend endpoint
